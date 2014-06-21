@@ -1,0 +1,16 @@
+{
+    "contents" : "shinyUI(\n  navbarPage(\"Fast\", id = \"nav_fast\", collapsable = TRUE, \n             \n             tabPanel(\"Data\", uiOutput('data_ui_and_tabs')),\n             \n             navbarMenu(\"Forecasting\",\n                        tabPanel(\"ARIMA\", uiOutput(\"autoarima\")))\n             \n             ))",
+    "created" : 1403362803491.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4280802403",
+    "id" : "7FB4CF16",
+    "lastKnownWriteTime" : 1403362815,
+    "path" : "~/R/shiny/fast/ui.R",
+    "project_path" : "ui.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
