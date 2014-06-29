@@ -32,7 +32,7 @@ shinyServer(function(input, output, session){
   
   
   # source dari data & alat analisis
-  R.utils::sourceDirectory('tools/analysis', recursive = TRUE)
-  R.utils::sourceDirectory('tools/data', recursive = TRUE)
-  R.utils::sourceDirectory('tools/app', recursive = TRUE)
+  R.utils::sourceDirectory('tools/analysis', recursive = TRUE, modifiedOnly = FALSE)
+  R.utils::sourceDirectory('tools/data', recursive = TRUE, modifiedOnly = FALSE)
+  R.utils::sourceDirectory('tools/app', recursive = TRUE, modifiedOnly = FALSE)
 })

@@ -10,10 +10,14 @@ output$uiArima_var1 <- renderUI({
 output$autoarima <- renderUI ({
   sidebarLayout(
     sidebarPanel(
+      div(class = "busy",
+          p("Calculation in progress ..."),
+          img(src="ajaxloaderq.gif")
+      ),
       wellPanel(
         HTML(paste("<label><strong>Menu:", "Forecasting","</strong></label>")),
         HTML(paste("<label><strong>Tool:",isolate(input$nav_fast),"</strong></label>")),
-        HTML(paste("<label><strong>Data:",isolate(input$datasets),"</strong></label>"))
+        HTML(paste("<label><strong>Data:",input$datasets,"</strong></label>"))
       ),
       wellPanel(
         uiOutput("uiArima_var1")
@@ -100,28 +104,26 @@ output$autoarima <- renderUI ({
             label = "Number Of Period",
             min = 0,
             value = 10))
-        )
+      )
     ),
     mainPanel(
       tabsetPanel(
         id = "arimatab",
         tabPanel(
-          div(class = "busy",
-              p("Calculation in progress ..."),
-              img(src="ajaxloaderq.gif")
-          ),
-          title = "Historical Plot",
-          conditionalPanel(condition="!$('html').hasClass('shiny-busy')",
-                           plotOutput(outputId = "arimaplot")),
-          value = 1),
-        tabPanel(
           title = "Identification",
-          helpText("Identify the model of the simulated data using the correlograms,
-                 the", strong("Autocorrelation Function"), "(ACF) and the", 
-                   strong("Partial Autocorrelation Function"), "(PACF).",
-                   br(),br()),
+          #           helpText("Identify the model of the simulated data using the correlograms,
+          #                  the", strong("Autocorrelation Function"), "(ACF) and the", 
+          #                    strong("Partial Autocorrelation Function"), "(PACF).",
+          #                    br(),br()),
           tabsetPanel(
             id = "subtab",
+            tabPanel(
+              title = "Historical Plot",
+              plotOutput(outputId = "arimaplot"),
+              helpText(strong("Differenced Series Plot"),br(), "Apply differencing to see the differenced series plot."),
+              plotOutput(
+                outputId = "h.new")
+            ),
             tabPanel(
               title = " ACF",
               plotOutput(
@@ -133,14 +135,7 @@ output$autoarima <- renderUI ({
               plotOutput(
                 outputId = "pacf"),
               verbatimTextOutput(outputId = "pacfval"),
-              value = 2),
-            tabPanel(
-              title = "Differenced Series",
-              helpText("Unless differencing is applied,
-                     you will see nothing in this tab."),
-              plotOutput(
-                outputId = "h.new"),
-              value = 3)),
+              value = 2)),
           value = 2),
         tabPanel(
           title = "Estimation",
@@ -200,6 +195,10 @@ output$autoarima <- renderUI ({
               plotOutput(outputId = "fitplot"),
               value = 2)),
           value = 5
+        ),
+        tabPanel(
+          title = "HandsonTable",
+          htable(outputId = "tbl", clickId = "tblClick",colHeaders = "provided" ,rowNames = "enabled", minCols = 4, minRows = 200, width = 1000, height = 650) #bagian handsonTable
         )
       )
     )
@@ -212,13 +211,32 @@ getdata_ts <- reactive({
   return(dat[,as.character(input$arima_var1)])
 })
 
-
 ######################################################
 ## Bagian perhitungan
 ######################################################
 
+# handsonTable
+chacedTbl <- NULL
+
+output$tbl <- renderHtable({
+  if (is.null(input$tbl)){
+  dat <- getdata()
+  dat <- as.data.frame(dat)
+  tbl <- dat
+  chacedTbl <<- tbl
+  print(tbl)
+  return(tbl)
+  } else{
+    chacedTbl <<- input$tbl
+    print(input$tbl)
+    values[[input$datasets]] <- input$tbl
+    return(input$tbl)
+  }
+})
+
 # plot data awal
 output$arimaplot <- renderPlot({
+  par(mfcol = c(1,1), mar = c(5,4,1,2))
   plot(getdata_ts())
 })
 
@@ -266,6 +284,7 @@ output$pacfval <- renderPrint({
 output$h.new <- renderPlot({
   if(input$dfdat){
     val1 <- diff(getdata_ts(), differences = as.numeric(input$dfd))
+    par(mfcol = c(1,1), mar = c(5,4,1,2))
     p <- plot(val1)
     print(p)
   }
@@ -277,7 +296,7 @@ estimate.auto <- reactive({
     k <- auto.arima(getdata_ts(), ic = input$ic, stepwise = FALSE)
   }
   if(as.numeric(input$methods) == 2){
-    k <- Arima(getdata_ts(), order = c(input$ar, input$df, input$ma))
+    k <- Arima(getdata_ts(), order = c(input$ar, input$df, input$ma), include.drift = TRUE)
   }
   return(k)
 })
@@ -369,17 +388,17 @@ qacf <- function(x, conf.level = 0.95, max.lag = NULL,
     fill = factor(significant))
   q <- q + geom_hline(
     yintercept = -ciline,
-    color = "blue", size = 0.2)
+    color = "blue", size = 0.2, linetype="dashed")
   q <- q + geom_hline(
     yintercept = ciline,
-    color = "blue", size = 0.2)
+    color = "blue", size = 0.2, linetype="dashed")
   q <- q + geom_hline(
     yintercept = 0, color = "red",
     size = 0.3)
   q <- q + scale_fill_hue(
     name = paste("Significant at the", conf.level, "level"),
     breaks = 0:1,
-    labels = c("False", "True")) +
+    labels = c("Not Significant", "Significant")) +
     theme(panel.background = element_rect(
       size = 3, 
       colour = "black",
@@ -423,16 +442,16 @@ qpacf <- function(x, conf.level = 0.95, max.lag = NULL,
     fill = factor(significant))
   q <- q + geom_hline(
     yintercept = -ciline,
-    color = "blue", size = 0.2)
+    color = "blue", size = 0.2, linetype="dashed")
   q <- q + geom_hline(
     yintercept = ciline,
-    color = "blue", size = 0.2)
+    color = "blue", size = 0.2, linetype="dashed")
   q <- q + geom_hline(
     yintercept = 0, color = "red",
     size = 0.3)
   q <- q + scale_fill_hue(
     name = paste("Significant at the", conf.level, "level"), 
-    breaks = 0:1, labels = c("False", "True")) +
+    breaks = 0:1, labels = c("Not Significant", "Significant")) +
     theme(panel.background = element_rect(
       size = 3, 
       colour = "black",

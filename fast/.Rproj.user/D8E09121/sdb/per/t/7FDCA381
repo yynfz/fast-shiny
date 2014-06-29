@@ -1,0 +1,16 @@
+{
+    "contents" : "#############################################\n# View table output of the selected dataset\n#############################################\noutput$uiView_vars <- renderUI({\n  vars <- varnames()\n  selectInput(\"view_vars\", \"Select variables to show:\", choices  = vars, \n    selected = state_init_multvar(\"view_vars\",vars, vars), multiple = TRUE, selectize = FALSE)\n})\n\noutput$ui_View <- renderUI({\n  list(\n    wellPanel(\n      uiOutput(\"uiView_vars\"), \n      returnTextInput(\"view_select\", \"Subset (e.g., price > 5000)\", state_init(\"view_select\"))\n    ),\n    helpModal('View','viewHelp',inclMD(\"tools/help/view.md\"))\n  )\n})\n\noutput$dataviewer <- renderDataTable({\n\n  # if(isolate(input$datatabs) != 'View') return(invisible())\n  # if(is.null(input$datasets) || is.null(input$view_vars)) return()\n  \n  if(is.null(input$view_vars)) return()\n  # dat <- date2character()\n  dat <- getdata()\n\n  if(!all(input$view_vars %in% colnames(dat))) return()\n  if(input$view_select != \"\") {\n    selcom <- input$view_select\n    selcom <- gsub(\" \", \"\", selcom)\n\n    seldat <- try(do.call(subset, list(dat,parse(text = selcom))), silent = TRUE)\n\n    if(!is(seldat, 'try-error')) {\n      if(is.data.frame(seldat)) {\n        dat <- seldat\n        seldat <- NULL\n      }\n    }\n  }\n\n  as.data.frame(dat[, input$view_vars, drop = FALSE])\n\n}, options = list(bSortClasses = TRUE, bCaseInsensitive = TRUE, \n  aLengthMenu = c(10, 20, 30, 50), iDisplayLength = 10))\n",
+    "created" : 1404049126326.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4142273390",
+    "id" : "7FDCA381",
+    "lastKnownWriteTime" : 1395837507,
+    "path" : "~/R/shiny/fast/tools/data/view.R",
+    "project_path" : "tools/data/view.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}

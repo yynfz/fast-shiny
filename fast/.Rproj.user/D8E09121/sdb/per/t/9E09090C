@@ -1,0 +1,16 @@
+{
+    "contents" : "################################################################\n# fungsi yang digunakan bersama dalam aplikasi\n################################################################\n# mengganti data\nchangedata <- function(addCol, addColName = \"\") {\n  if(nrow(getdata()) == nrow(addCol) && addColName[1] != \"\") {\n    return(values[[input$datasets]][,addColName] <- addCol)\n  }\n}\n\nchangedata_names <- function(oldnames, newnames) {\n  upnames <- colnames(values[[input$datasets]])\n  upnames[which(upnames %in% oldnames)] <- newnames\n  return(colnames(values[[input$datasets]]) <- upnames)\n}\n\ninChecker <- function(tocheck) {\n  ifelse(sum(tocheck %in% varnames()) < length(tocheck), return(NULL), return('OK'))\n}\n\n# fungsi untuk mengambil data dari varaibel global berdasarkan pilihan user\ngetdata <- reactive({\n  values[[input$datasets]]\n})\n\n# mendapatkan kelas dari data\ngetdata_class <- reactive({\n  # don't use isolate here or values won't change when the dataset is changed\n  cls <- sapply(getdata(), function(x) class(x)[1])\n  gsub(\"ordered\",\"factor\", cls)\n})\n\ngetdata_class_ts <- reactive({\n  # don't use isolate here or values won't change when the dataset is changed\n  cls <- sapply(ts(getdata()), function(x) class(x)[1])\n  gsub(\"ordered\",\"factor\", cls)\n})\n\n# mengambil nama variabel dari data\nvarnames <- reactive({\n  dat <- getdata_class()\n  vars <- names(dat)\n  names(vars) <- paste(vars, \" {\", dat, \"}\", sep = \"\")\n  vars\n})\n\nvarnames_ts <- reactive({\n  dat <- getdata_class_ts()\n  vars <- names(dat)\n  names(vars) <- paste(vars, \" {\", dat, \"}\", sep = \"\")\n  vars\n})\n# untuk mengubah tanggal menjadi karakter\ndate2character <- reactive({\n  date2character_dat(getdata())\n})\n\n# proses mengubah tanggal menjadi karakter\ndate2character_dat <- function(dat) {\n  # xtable tidak bisa memakai tipe dates\n  isDate <- c(sapply(dat, is.Date))\n  dat[,isDate] <- sapply(dat[,isDate], as.character)\n  dat\n}\n\n################################################################\n# fungsi untuk memudahkah membuat input dan output\n################################################################\n# mengatur lebar plot sesuai dengan input$viz_plot_width di visualize.R, defaultnya 650px\nplotWidth <- function() {\n  ifelse(is.null(input$viz_plot_width), return(values$plotWidth), return(input$viz_plot_width))\n}\n\n# mengatur tinggi plot sesuai dengan input$viz_plot_height di visualize.R, defaultnya 650px\nplotHeight <- function() {\n  ifelse(is.null(input$viz_plot_width), return(values$plotHeight), return(input$viz_plot_height))\n}",
+    "created" : 1404051326262.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3783066790",
+    "id" : "9E09090C",
+    "lastKnownWriteTime" : 1404051413,
+    "path" : "~/R/shiny/fast/fast.R",
+    "project_path" : "fast.R",
+    "properties" : {
+    },
+    "source_on_save" : false,
+    "type" : "r_source"
+}
