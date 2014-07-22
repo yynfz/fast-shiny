@@ -1,15 +1,9 @@
 #######################################
 # Manage datasets in/out of Radiant
 #######################################
-
-library(Hmisc)
-library(foreign)
-library(gdata)
-library(WriteXLS)
-
 output$ui_Manage <- renderUI({
   list(wellPanel(
-      selectInput(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", ".xls/.xlsx"="xls",".sav"="sav",".xpt"="xpt",".dta"="dta",".mtp"="mtp","clipboard" = "clipboard", "examples" = "examples"), 
+      radioButtons(inputId = "dataType", label = "Load data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard", "examples" = "examples"), 
         selected = "rda"),
       conditionalPanel(condition = "input.dataType != 'clipboard' && input.dataType != 'examples'",
         conditionalPanel(condition = "input.dataType == 'csv'",
@@ -26,7 +20,7 @@ output$ui_Manage <- renderUI({
       )
     ),
     wellPanel(
-      selectInput(inputId = "saveAs", label = "Save data:", c(".rda" = "rda", ".csv" = "csv", ".xls/.xlsx"="xls",".sav"="sav",".xpt"="xpt",".dta"="dta",".mtp"="mtp","clipboard" = "clipboard"), 
+      radioButtons(inputId = "saveAs", label = "Save data:", c(".rda" = "rda", ".csv" = "csv", "clipboard" = "clipboard"), 
         selected = "rda"),
       checkboxInput("man_add_descr","Add/edit data description", FALSE),
       conditionalPanel(condition = "input.man_add_descr == true",
@@ -157,23 +151,6 @@ output$downloadData <- downloadHandler(
     } else if(ext == 'csv') {
       assign(robj, getdata())
       write.csv(get(robj), file)
-    } else if(ext == 'xls') {
-      assign(robj, getdata())
-      WriteXLS(get(robj), "WriteXLS.xls", perl = "C:/xampp/perl/bin/perl.exe")
-    } else if(ext == 'sav') {
-      assign(robj, getdata())
-      write.csv(get(robj), file)
-	  write.foreign(get(robj),file,"brainIQ_datalist.sps",package="SPSS")
-    }
-	else if(ext == 'xpt') {
-      assign(robj, getdata())
-	  write.foreign(get(robj), file, "brainIQ_datalist.sas",   package="SAS")
-    } else if(ext == 'dta') {
-      assign(robj, getdata())
-	  write.dta(get(robj), file, "brainIQ_datalist.dta")
-    }else if(ext == 'mtp') {
-      assign(robj, getdata())
-	  write.mtp(get(robj), file, "brainIQ_datalist.mtp")
     }
   }
 )
@@ -264,15 +241,9 @@ loadUserData <- function(filename, uFile, ext) {
   }
 
   if(ext == 'sav') {
-    values[[objname]] <- spss.get(uFile, use.value.labels=TRUE)
-  } else if(ext == 'xls') {
-	values[[objname]] <- read.xls(uFile, perl="C:/xampp/perl/bin/perl.exe")
-  } else if(ext == 'xpt') {
-	values[[objname]] <- sasxport.get(uFile)
+    values[[objname]] <- as.data.frame(as.data.set(spss.system.file(uFile)))
   } else if(ext == 'dta') {
     values[[objname]] <- read.dta(uFile)
-  } else if(ext == 'mtp') {
-    values[[objname]] <- read.mtp(uFile)
   } else if(ext == 'csv') {
     values[[objname]] <- read.csv(uFile, header=input$header, sep=input$sep)
   }
