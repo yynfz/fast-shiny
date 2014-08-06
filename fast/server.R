@@ -16,15 +16,28 @@ shinyServer(function(input, output, session){
       values$plotHeight <- 650
       values$plotWidth <- 650
       
+      nilaiTabel <<- reactiveValues()
+      nilaiTabel[["tmp"]] <- data.frame()
+      nilaiTabel[["flag"]] <- 0
+      
+      nilaiTabel[["frequency"]] <- 12
+      nilaiTabel[["start"]] <- 1990
+      
       # Datasets can change over time (i.e. the changedata function). Therefore,
       # the data need to be a reactive value so the other reactive functions
       # and outputs that depend on these datasets will know when they are changed.
       # robj <- load("../base/data/data_init/diamonds.rda") 
-      robj <- load("data/data_init/diamonds.rda") 
+      
+      #       robj <- load("data/data_init/diamonds.rda") 
+      #       df <- get(robj)
+      #       values[["diamonds"]] <- df
+      #       values[["diamonds_descr"]] <- attr(df,'description')
+      #       values$datasetlist <- c("diamonds")
+      robj <- load("data/data_init/ihk_nurmi.rda") 
       df <- get(robj)
-      values[["diamonds"]] <- df
-      values[["diamonds_descr"]] <- attr(df,'description')
-      values$datasetlist <- c("diamonds")
+      values[["ihk"]] <- df
+      values[["ihk_descr"]] <- attr(df,'description')
+      values$datasetlist <- c("ihk")
     }
   }
   
