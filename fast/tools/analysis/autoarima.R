@@ -13,6 +13,16 @@ observe({
   }
 })
 
+output$uimenu <- renderUI({
+  wellPanel(
+    HTML(paste("<label><strong>Menu:", "Forecasting","</strong></label>")),
+    HTML(paste("<label><strong>Tool:",isolate(input$nav_fast),"</strong></label>")),
+    HTML(paste("<label><strong>Data:",input$datasets,"</strong></label>"))
+    #textOutput(outputId = "namadata")
+    # actionButton('commit', 'Commit Change')
+  )
+})
+
 output$autoarima <- renderUI ({
   sidebarLayout(
     sidebarPanel(
@@ -20,12 +30,7 @@ output$autoarima <- renderUI ({
           p("Calculation in progress ..."),
           img(src="ajaxloaderq.gif")
       ),
-      wellPanel(
-        HTML(paste("<label><strong>Menu:", "Forecasting","</strong></label>")),
-        HTML(paste("<label><strong>Tool:",isolate(input$nav_fast),"</strong></label>")),
-        HTML(paste("<label><strong>Data:",input$datasets,"</strong></label>"))
-        # actionButton('commit', 'Commit Change')
-      ),
+      uiOutput("uimenu"),
       wellPanel(
         uiOutput("uiArima_var1")
       ),
@@ -825,6 +830,12 @@ qpacf <- function(x, conf.level = 0.95, max.lag = NULL,
         size = 13))
   return(q)
 }
+
+# menampilkan nama datasets
+output$namadata <- renderText({
+  nama <- paste0("Data: ", input$datasets)
+  nama
+})
 
 # bagian report, save html, pdf word dll.
 # observe({
